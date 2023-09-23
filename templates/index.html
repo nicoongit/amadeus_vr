@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VR Tours</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <style>
+        .activity {
+            margin-bottom: 20px;
+        }
+        .vr-scene {
+            width: 300px;
+            height: 200px;
+            margin-top: 10px;
+            display: none; /* Initially hide VR scenes */
+        }
+        .static-image {
+            width: 300px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Available Tours</h2>
+
+{% for activity in activities["data"] %}
+    {% if loop.index <= 3 and activity['pictures'] %}
+        <div class="activity">
+            <h3>{{ activity['name'] }}</h3>
+            <img class="static-image" src="{{ activity['pictures'][0] }}" alt="{{ activity['name'] }} Image">
+            <p>{{ activity['description'] }}</p>
+            <div class="vr-scene" data-url="{{ activity['pictures'][0] }}"></div>
+            <a href="{{ activity["bookingLink"] }}" target="_blank">Book Now</a>
+        </div>
+    {% endif %}
+{% endfor %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var vrScenes = document.querySelectorAll('.vr-scene');
+
+        vrScenes.forEach(function (sceneDiv) {
+            var imgUrl = sceneDiv.getAttribute('data-url');
+            var scene = document.createElement('a-scene');
+            var sky = document.createElement('a-sky');
+
+            sky.setAttribute('src', imgUrl);
+            scene.setAttribute('embedded', 'true');
+
+            scene.appendChild(sky);
+            sceneDiv.appendChild(scene);
+
+            // Once the scene is appended, we can display the VR view
+            sceneDiv.style.display = "block";
+        });
+    });
+</script>
+
+</body>
+</html>
