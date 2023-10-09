@@ -1,48 +1,40 @@
 from flask import Flask, jsonify, render_template
-import requests
+from amadeus import Client
 
 app = Flask(__name__)
 
-AMADEUS_BASE_URL = "https://test.api.amadeus.com/v1"
-CLIENT_ID = "XXXX"  # Replace with your client id
-CLIENT_SECRET = "XXXX"  # Replace with your client secret
+CLIENT_ID = 't0RuoeMPg4KjA5d6BcEJxI8g7w8nESpr'
+CLIENT_SECRET = 'vQI5LkDvzAhqae3C'
 
-
-def get_access_token():
-    auth_url = "https://test.api.amadeus.com/v1/security/oauth2/token"
-    headers = {
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
-    data = {
-        "grant_type": "client_credentials",
-        "client_id": CLIENT_ID,
-        "client_secret": CLIENT_SECRET
-    }
-    response = requests.post(auth_url, headers=headers, data=data)
-    return response.json().get("access_token")
+# Initialize the Amadeus Client
+amadeus = Client(
+    client_id=CLIENT_ID,
+    client_secret=CLIENT_SECRET,
+    hostname='test'  # use 'production' for production environment
+)
 
 
 @app.route('/get-activities/<latitude>/<longitude>', methods=['GET'])
 def get_activities(latitude, longitude):
-    access_token = get_access_token()
-    headers = {
-        "Authorization": f"Bearer {access_token}"
-    }
-    response = requests.get(
-        f"{AMADEUS_BASE_URL}/shopping/activities?latitude={latitude}&longitude={longitude}&radius=1",
-        headers=headers
-    )
-    
+    response = amadeus.shopping.activities.get(latitude=latitude, longitude=longitude)
+
     if response.status_code == 200:
-        return response.json()
+        return jsonify(response.data)
     else:
-        return {"message": "Error fetching data from Amadeus API"}
+        return jsonify({"message": "Error fetching data from Amadeus API", "error": response.data})
 
 
 @app.route('/')
 def index():
     # For demonstration purposes, using predefined latitude and longitude.
-    activities = get_activities("40.41436995", "-3.69170868")
+    activities_response = amadeus.shopping.activities.get(latitude="40.41436995", longitude="-3.69170868")
+    
+    # Log the response for debugging purposes
+    print("Amadeus API Response:", activities_response.data)
+
+    # Assuming the response structure is a list of activities directly (this might need adjustment based on actual structure)
+    activities = activities_response.data if activities_response.status_code == 200 else []
+
     return render_template("index.html", activities=activities)
 
 
