@@ -3,8 +3,8 @@ from amadeus import Client
 
 app = Flask(__name__)
 
-CLIENT_ID = 't0RuoeMPg4KjA5d6BcEJxI8g7w8nESpr'
-CLIENT_SECRET = 'vQI5LkDvzAhqae3C'
+CLIENT_ID = '<YOUR-ID>'
+CLIENT_SECRET = '<YOUR-SECRET>'
 
 # Initialize the Amadeus Client
 amadeus = Client(
